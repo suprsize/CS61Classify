@@ -26,8 +26,17 @@
 matmul:
 
     # Error checks
+    bge zero, a1, error  # if(0 < m0Row)
+    bge zero, a2, error  # if(0 < m0Col)
+    bge zero, a4, error  # if(0 < m1Row)
+    bge zero, a5, error  # if(0 < m1Col)
+    bne a2, a4, error    # if(m0Col == m1Row)
+    jal x0, start
+error:  
+    addi a1, zero, 34           # error code 34
+    jal exit2                   # exit
 
-
+start:
     # Prologue
     addi sp, sp, -48             
     sw s0, 0(sp)
@@ -43,6 +52,8 @@ matmul:
     sw s10, 40(sp)
     sw ra, 44(sp)
     # End Prologue
+
+    # Copy
     mv s0, a0
     mv s1, a1
     mv s2, a2
@@ -50,6 +61,7 @@ matmul:
     mv s4, a4
     mv s5, a5
     mv s6, a6
+    # End of Copy
 
     addi s7, zero, 0            # Initialize outer_loop counter
     addi s9, zero, 0            # Initialize output array indexer
@@ -61,25 +73,24 @@ outer_loop_start:
     add s10, s0, t0             # Set the begining of array0 for dot
     addi s8, zero, 0            # Initialize inner_loop counter
 inner_loop_start:
-    bge s8, s5, inner_loop_end
-    slli t3, s8, 2
-    mv a0, s10                  # Set the begining of array0 for dot
-    add a1, s3, t3
-    mv a2, s2                   # Set the length of arrays passed to dot
-    addi a3, zero, 1            # Set the stride of array0 from m0 to dot
-    add a4, zero, s5
-    jal ra, dot
-    slli t4, s9, 2
-    add t4, t4, s6
-    sw a0, 0(t4)
-    addi s8, s8, 1           # Increment inner counter
-    addi s9, s9, 1           # Increment output array indexer 
-    jal x0, inner_loop_start 
+    bge s8, s5, inner_loop_end  # while(innerCounter < cols of m1)
+    slli t3, s8, 2              # Calculate the offset for m1
+    add a1, s3, t3              # Set the address of array1 of m1 (dot arg)
+    mv a0, s10                  # Set the begining of array0 (dot arg)
+    mv a2, s2                   # Set the length of arrays passed  (dot arg)
+    addi a3, zero, 1            # Set the stride of array0 from m0 (dot arg)
+    add a4, zero, s5            # set the stride of array1 from m1 (dot arg)
+    jal ra, dot                 # call dot
+    slli t4, s9, 2              # Calculate offset for array output
+    add t4, t4, s6              # Getting element address of array output
+    sw a0, 0(t4)                # Saving to array output result of dot product
+    addi s8, s8, 1              # Increment inner counter
+    addi s9, s9, 1              # Increment output array indexer 
+    jal x0, inner_loop_start    # loop back to inner_loop
 inner_loop_end:
-    addi s7, s7, 1            # Increment outer counter
-    jal x0, outer_loop_start
+    addi s7, s7, 1              # Increment outer counter
+    jal x0, outer_loop_start    # loop back to outer_loop
 outer_loop_end:
-
 
     # Epilogue
     lw s0, 0(sp)
@@ -94,6 +105,7 @@ outer_loop_end:
     lw s9, 36(sp)
     lw s10, 40(sp)
     lw ra, 44(sp)
-    addi sp, sp, 48           
+    addi sp, sp, 48
+    # End of Epilogue           
 
     ret
