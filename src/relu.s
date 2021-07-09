@@ -1,5 +1,4 @@
 .globl relu
-
 .text
 # ==============================================================================
 # FUNCTION: Performs an inplace element-wise ReLU on an array of ints
@@ -13,10 +12,14 @@
 #   this function terminates the program with error code 32
 # ==============================================================================
 relu:
-    # Prologue
 
-    addi t0, x0, 0
-    addi t1, x0, 0
+    # Prologue
+    addi t0, zero, 0
+    addi t1, zero, 0
+   	addi t5, zero, 1
+    bge a1, t5, loop_start
+    addi a1, zero, 32
+    jal exit2
 loop_start:
 	bge t0, a1, loop_end
 	slli t2, t0, 2
@@ -28,8 +31,5 @@ loop_continue:
 	addi t0, t0, 1
 	jal x0 loop_start
 loop_end:
-
-
     # Epilogue
-
 	ret
