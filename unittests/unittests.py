@@ -232,6 +232,19 @@ class TestMatmul(TestCase):
             [30, 36, 42, 66, 81, 96, 102, 126, 150]
         )
 
+    def test_zero_length(self):
+        self.do_matmul(
+            [1, 2, 3, 4, 5, 6, 7, 8, 9], 9, 0,
+            [1, 2, 3, 4, 5, 6, 7, 8, 9], 3, 3,
+            [30, 36, 42, 66, 81, 96, 102, 126, 150], 34
+        )
+    def test_no_mul(self):
+        self.do_matmul(
+            [1, 2, 3, 4, 5, 6, 7, 8], 4, 2,
+            [1, 2, 3, 4, 5, 6, 7, 8, 9], 3, 3,
+            [30, 36, 42, 66, 81, 96, 102, 126, 150], 34
+        )
+
     @classmethod
     def tearDownClass(cls):
         print_coverage("matmul.s", verbose=False)
