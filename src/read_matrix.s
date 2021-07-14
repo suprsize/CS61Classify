@@ -1,12 +1,6 @@
 
 #define c_int_size 4
 
-.data
-.align 2
-
-matrix_ptr: .word -1
-
-
 .globl read_matrix
 
 .text
