@@ -319,19 +319,21 @@ class TestWriteMatrix(TestCase):
         # generate assembly and run it through venus
         t.execute(fail=fail, code=code)
         # compare the output file against the reference
-        t.check_file_output(outfile, "outputs/test_write_matrix/reference.bin")
+        if fail == '':
+            t.check_file_output(outfile, "outputs/test_write_matrix/reference.bin")
+        
 
     def test_simple(self):
         self.do_write_matrix()
 
-    # def test_fopen_error(self):
-    #     self.do_write_matrix("fopen", 64)
+    def test_fopen_error(self):
+        self.do_write_matrix("fopen", 64)
 
-    # def test_fwrite_error(self):
-    #     self.do_write_matrix("fwrite", 67)
+    def test_fwrite_error(self):
+        self.do_write_matrix("fwrite", 67)
 
-    # def test_fclose_error(self):
-    #     self.do_write_matrix("fclose", 65)
+    def test_fclose_error(self):
+        self.do_write_matrix("fclose", 65)
 
     @classmethod
     def tearDownClass(cls):
