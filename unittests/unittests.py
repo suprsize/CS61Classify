@@ -252,10 +252,10 @@ class TestMatmul(TestCase):
 
 class TestReadMatrix(TestCase):
 
-    def do_read_matrix(self, m_rows, m_cols, result, fail='', code=0):
+    def do_read_matrix(self, fail='', code=0):
         t = AssemblyTest(self, "read_matrix.s")
         # load address to the name of the input file into register a0
-        t.input_read_filename("a0", "inputs/test_read_matrix/" + "test_input.bin")
+        t.input_read_filename("a0", "inputs/test_read_matrix/test_input.bin")
 
         # allocate space to hold the rows and cols output parameters
         rows = t.array([-1])
@@ -270,30 +270,30 @@ class TestReadMatrix(TestCase):
         t.call("read_matrix")
 
         # check the output from the function
-        t.check_array(rows, m_rows)
-        t.check_array(cols, m_cols)
-        t.check_array_pointer("a0", result)
+        t.check_array(rows, [3])
+        t.check_array(cols, [3])
+        t.check_array_pointer("a0", [1, 2, 3,
+                                     4, 5, 6,
+                                     7, 8, 9])
         # TODO
 
         # generate assembly and run it through venus
         t.execute(fail=fail, code=code)
 
     def test_simple(self):
-        self.do_read_matrix([3], [3],  [1, 2, 3,
-                                        4, 5, 6,
-                                        7, 8, 9])
+        self.do_read_matrix()
 
     def test_malloc_error(self):
-        self.do_read_matrix([3], [3],  [1, 2, 3, 4, 5, 6, 7, 8, 9], "malloc", 48)
+        self.do_read_matrix("malloc", 48)
 
     def test_fopen_error(self):
-        self.do_read_matrix([3], [3],  [1, 2, 3, 4, 5, 6, 7, 8, 9], "fopen", 64)
+        self.do_read_matrix("fopen", 64)
 
     def test_fread_error(self):
-        self.do_read_matrix([3], [3],  [1, 2, 3, 4, 5, 6, 7, 8, 9], "fread", 66)
+        self.do_read_matrix("fread", 66)
 
     def test_fclose_error(self):
-        self.do_read_matrix([3], [3],  [1, 2, 3, 4, 5, 6, 7, 8, 9], "fclose", 65)
+        self.do_read_matrix("fclose", 65)
 
     @classmethod
     def tearDownClass(cls):
@@ -308,8 +308,12 @@ class TestWriteMatrix(TestCase):
         # load output file name into a0 register
         t.input_write_filename("a0", outfile)
         # load input array and other arguments
-        raise NotImplementedError("TODO")
-        # TODO
+        array0 = t.array([1, 2, 3,
+                          4, 5, 6,
+                          7, 8, 9])
+        t.input_array("a1", array0)
+        t.input_scalar("a2", 3)
+        t.input_scalar("a3", 3)
         # call `write_matrix` function
         t.call("write_matrix")
         # generate assembly and run it through venus
@@ -319,6 +323,15 @@ class TestWriteMatrix(TestCase):
 
     def test_simple(self):
         self.do_write_matrix()
+
+    # def test_fopen_error(self):
+    #     self.do_write_matrix("fopen", 64)
+
+    # def test_fwrite_error(self):
+    #     self.do_write_matrix("fwrite", 67)
+
+    # def test_fclose_error(self):
+    #     self.do_write_matrix("fclose", 65)
 
     @classmethod
     def tearDownClass(cls):
