@@ -283,6 +283,18 @@ class TestReadMatrix(TestCase):
                                         4, 5, 6,
                                         7, 8, 9])
 
+    def test_malloc_error(self):
+        self.do_read_matrix([3], [3],  [1, 2, 3, 4, 5, 6, 7, 8, 9], "malloc", 48)
+
+    def test_fopen_error(self):
+        self.do_read_matrix([3], [3],  [1, 2, 3, 4, 5, 6, 7, 8, 9], "fopen", 64)
+
+    def test_fread_error(self):
+        self.do_read_matrix([3], [3],  [1, 2, 3, 4, 5, 6, 7, 8, 9], "fread", 66)
+
+    def test_fclose_error(self):
+        self.do_read_matrix([3], [3],  [1, 2, 3, 4, 5, 6, 7, 8, 9], "fclose", 65)
+
     @classmethod
     def tearDownClass(cls):
         print_coverage("read_matrix.s", verbose=False)
