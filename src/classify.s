@@ -81,28 +81,23 @@ classify:
     la a1, m0_row
     la a2, m0_col
     jal ra, read_matrix
-    mv s1, a0
-
+    mv s1, a0               # s1 = address of m0 matrix
 
 
     # Load pretrained m1
-
     mv a0, s2
     la a1, m1_row
     la a2, m1_col
     jal ra, read_matrix
-    mv s2, a0
-
+    mv s2, a0               # s2 = address of m1 matrix
 
 
     # Load input matrix
-
-
     mv a0, s3
     la a1, input_row
     la a2, input_col
     jal ra, read_matrix
-    mv s3, a0
+    mv s3, a0               # s3 = address of input matrix
 
     la t6, m0_row
     lw t0, 0(t6)
@@ -127,15 +122,63 @@ classify:
 
 
 
+# MALLOC for m0 * input
+    la t0, m0_row
+    lw t0, 0(t0)
+    la t1, input_col
+    lw t1, 0(t1)
+    mul s6, t0, t1          # s6 = number of elements of (m0 * input)
+    li t0, c_int_size
+    mul a0, s6, t0
+    jal ra, malloc 
+    beqz a0, malloc_error   # if(malloc return == NULL)
+    mv s5, a0               # s5 = m0 * input
+
+    mv a0, s1
+    la t0, m0_row
+    lw a1, 0(t0)
+    la t0, m0_col
+    lw a2, 0(t0)
+    mv a3, s3
+    la t0, input_row
+    lw a4, 0(t0)
+    la t0, input_col
+    lw a5, 0(t0)
+    mv a6, s5
+    jal ra, matmul
 
 
 
+    mv a0, s5
+    mv a1, s6
+    jal ra, relu
 
 
+# MALLOC for m1 * ReLU(m0 * input)
+    la t0, m1_row
+    lw t0, 0(t0)
+    la t1, input_col
+    lw t1, 0(t1)
+    mul s8, t0, t1          # s8 = number of elements of m1 * ReLU(m0 * input)
+    li t0, c_int_size
+    mul a0, s8, t0
+    jal ra, malloc 
+    beqz a0, malloc_error   # if(malloc return == NULL)
+    mv s7, a0               # s7 = m1 * ReLU(m0 * input)
 
 
-
-
+    mv a0, s2
+    la t0, m1_row
+    lw a1, 0(t0)
+    la t0, m1_col
+    lw a2, 0(t0)
+    mv a3, s5
+    la t0, m0_row
+    lw a4, 0(t0)
+    la t0, input_col
+    lw a5, 0(t0)
+    mv a6, s7
+    jal ra, matmul
 
     
 
@@ -144,6 +187,15 @@ classify:
     # WRITE OUTPUT
     # =====================================
     # Write output matrix
+
+    mv a0, s4
+    mv a1, s7
+    la t0, m1_row
+    lw a2, 0(t0)
+    la t0, input_col
+    lw a3, 0(t0)
+    jal ra, write_matrix
+
 
 
 
@@ -154,15 +206,24 @@ classify:
     # =====================================
     # Call argmax
 
+    mv a0, s7
+    mv a1, s8
+    jal ra, argmax
+    mv s9, a0               # s9 = argmax
 
 
 
     # Print classification
-    
+    bnez s0, finish         # skip printing if(a2 != 0)
+    mv a1, s9
+    jal ra, print_int
 
 
 
     # Print newline afterwards for clarity
+    li a1, 0x0a
+    jal ra, print_char
+
 
 
 j finish
