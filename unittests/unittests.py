@@ -275,8 +275,6 @@ class TestReadMatrix(TestCase):
         t.check_array_pointer("a0", [1, 2, 3,
                                      4, 5, 6,
                                      7, 8, 9])
-        # TODO
-
         # generate assembly and run it through venus
         t.execute(fail=fail, code=code)
 
@@ -358,15 +356,19 @@ class TestClassify(TestCase):
         ref_file = "outputs/test_basic_main/reference0.bin"
         args = ["inputs/simple0/bin/m0.bin", "inputs/simple0/bin/m1.bin",
                 "inputs/simple0/bin/inputs/input0.bin", out_file]
+
+        # t.input_scalar("a0", len(args))
+        # t.input_array()
         # call classify function
         t.call("classify")
         # generate assembly and pass program arguments directly to venus
         t.execute(args=args)
 
+        #TODO
         # compare the output file and
-        raise NotImplementedError("TODO")
-        # TODO
+        t.check_file_output(out_file, ref_file)
         # compare the classification output with `check_stdout`
+        check_stdout(6)
 
     @classmethod
     def tearDownClass(cls):
