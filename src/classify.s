@@ -56,10 +56,10 @@ classify:
 
     # Copy
     mv s0, a2
-    lw s1, 4(a1)    # m0 path
-    lw s2, 8(a1)    # m1 path
-    lw s3, 12(a1)   # input path
-    lw s4, 16(a1)   # output path
+    lw s1, 4(a1)                # m0 path
+    lw s2, 8(a1)                # m1 path
+    lw s3, 12(a1)               # input path
+    lw s4, 16(a1)               # output path
     # End of Copy
 
 
@@ -75,7 +75,7 @@ classify:
     la a1, m0_row
     la a2, m0_col
     jal ra, read_matrix
-    mv s1, a0               # s1 = address of m0 matrix
+    mv s1, a0                   # s1 = address of m0 matrix
 
 
     # Load pretrained m1
@@ -83,7 +83,7 @@ classify:
     la a1, m1_row
     la a2, m1_col
     jal ra, read_matrix
-    mv s2, a0               # s2 = address of m1 matrix
+    mv s2, a0                   # s2 = address of m1 matrix
 
 
     # Load input matrix
@@ -91,7 +91,7 @@ classify:
     la a1, input_row
     la a2, input_col
     jal ra, read_matrix
-    mv s3, a0               # s3 = address of input matrix
+    mv s3, a0                   # s3 = address of input matrix
 
     # =====================================
     # RUN LAYERS
@@ -107,12 +107,12 @@ classify:
     lw t0, 0(t0)
     la t1, input_col
     lw t1, 0(t1)
-    mul s6, t0, t1          # s6 = number of elements of (m0 * input)  or  ReLU(m0 * input)
+    mul s6, t0, t1              # s6 = number of elements of (m0 * input)  or  ReLU(m0 * input)
     li t0, c_int_size
     mul a0, s6, t0
     jal ra, malloc 
-    beqz a0, malloc_error   # if(malloc return == NULL)
-    mv s5, a0               # s5 = m0 * input    or    ReLU(m0 * input)
+    beqz a0, malloc_error       # if(malloc return == NULL)
+    mv s5, a0                   # s5 = m0 * input    or    ReLU(m0 * input)
 
     # Calculate m0 * input
     mv a0, s1
@@ -128,24 +128,22 @@ classify:
     mv a6, s5
     jal ra, matmul
 
-
     # Calculate ReLU(m0 * input)
     mv a0, s5
     mv a1, s6
     jal ra, relu
-
 
     # MALLOC for m1 * ReLU(m0 * input)
     la t0, m1_row
     lw t0, 0(t0)
     la t1, input_col
     lw t1, 0(t1)
-    mul s8, t0, t1          # s8 = number of elements of m1 * ReLU(m0 * input)
+    mul s8, t0, t1              # s8 = number of elements of m1 * ReLU(m0 * input)
     li t0, c_int_size
     mul a0, s8, t0
     jal ra, malloc 
-    beqz a0, malloc_error   # if(malloc return == NULL)
-    mv s7, a0               # s7 = m1 * ReLU(m0 * input)
+    beqz a0, malloc_error       # if(malloc return == NULL)
+    mv s7, a0                   # s7 = m1 * ReLU(m0 * input)
 
     # Calculate m1 * ReLU(m0 * input)
     mv a0, s2
@@ -161,8 +159,6 @@ classify:
     mv a6, s7
     jal ra, matmul
 
-    
-
 
     # =====================================
     # WRITE OUTPUT
@@ -177,20 +173,14 @@ classify:
     lw a3, 0(t0)
     jal ra, write_matrix
 
-
-
-
-
-
     # =====================================
     # CALCULATE CLASSIFICATION/LABEL
     # =====================================
     # Call argmax
-    mv a0, s7               # pointer to our final result matrix
-    mv a1, s8               # number of element sin the result matrix
-    jal ra, argmax          # Find the index of max number
-    mv s9, a0               # s9 = argmax
-
+    mv a0, s7                   # pointer to our final result matrix
+    mv a1, s8                   # number of element sin the result matrix
+    jal ra, argmax              # Find the index of max number
+    mv s9, a0                   # s9 = argmax
 
     # Print classification
     bnez s0, skip_print         # skip printing if(a2 != 0)
@@ -215,10 +205,6 @@ skip_print:
     jal ra, free
     mv a0, s7
     jal ra, free
-
-
-
-
 
 
 j finish
